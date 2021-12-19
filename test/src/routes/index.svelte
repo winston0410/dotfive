@@ -26,6 +26,19 @@
     };
 
     const handleEdit = (e: SubmitEvent) => {
+        const data = new FormData((e.target as HTMLFormElement))
+        const label = data.get("label")
+
+        editItem.label = label
+
+        const index = $items.findIndex(item => item.id === editItem.id)
+        
+        const updated = [...$items]
+        updated[index] = editItem
+
+        items.set(updated)
+
+        editOpen = false
     }
 
 	const handleCreate = (e: SubmitEvent) => {
