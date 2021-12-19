@@ -1,11 +1,24 @@
+import type { IData, IAction } from './types';
+
+import { BroadcastChannel, createLeaderElection } from 'broadcast-channel';
+
 const mkChannel = () => {
-	let channel, reducer; 
+	let channel, elector, reducer;
 
 	return {
-        connect(reducer){
-            channel = new BroadcastChannel('dotfive');
-        },
-		broadcast() {}
+		async connect(reducer) {
+			channel = new BroadcastChannel('dotfive');
+
+            channel.addEventListener('message', (data: IAction<IData>) => {
+                reducer(data)
+            });
+            
+			elector = createLeaderElection(channel);
+			await elector.awaitLeadership()
+		},
+		dispatch(action: IAction<IData>) {
+            channel.postMessage(action);
+		}
 	};
 };
 

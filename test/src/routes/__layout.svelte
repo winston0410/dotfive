@@ -7,8 +7,8 @@
 </script>
 
 <script lang="ts">
-    onMount(() => {
-        channel.connect(reducer)
+    onMount(async () => {
+        await channel.connect(reducer)
     })
 </script>
 

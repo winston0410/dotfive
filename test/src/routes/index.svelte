@@ -1,14 +1,11 @@
 <script lang="ts" context="module">
 	import { UnorderedList, ListItem, Button, Modal, Form, TextInput } from 'carbon-components-svelte';
 	import items from '../store/items';
+    import channel from '../channel'
+    import { IDataType, IMutation } from '../types'
 </script>
 
 <script lang="ts">
-	type IData = {
-		id: number;
-		label: string;
-	};
-
     let open = false;
     let editOpen = false;
     
@@ -17,6 +14,13 @@
 	const handleRemove = (id: number) => () => {
 		const removed = $items.filter((item) => item.id !== id);
 		items.set(removed);
+        channel.dispatch({
+            type: IDataType.Label,
+            mutation: IMutation.Remove,
+            payload: {
+                id
+            }
+        })
 	};
 
 	const popEditModal = (id: number) => () => {
@@ -26,6 +30,7 @@
     };
 
     const handleEdit = (e: SubmitEvent) => {
+        // TODO Validation
         const data = new FormData((e.target as HTMLFormElement))
         const label = data.get("label")
 
@@ -38,24 +43,40 @@
 
         items.set(updated)
 
+        channel.dispatch({
+            type: IDataType.Label,
+            mutation: IMutation.Update,
+            payload: editItem
+        })
+
         editOpen = false
     }
 
 	const handleCreate = (e: SubmitEvent) => {
+        // TODO Validation
         const data = new FormData((e.target as HTMLFormElement))
         const label = data.get("label")
         
 		const index = $items[$items.length - 1].id;
 
-		items.set([
-			...$items,
-			{
+
+		const newItem = {
 				id: index + 1,
 				label: (label as string)
 			}
+        
+		items.set([
+			...$items,
+            newItem
 		]);
 
         open = false;
+
+        channel.dispatch({
+            type: IDataType.Label,
+            mutation: IMutation.Create,
+            payload: newItem
+        })
 	};
 
     const popModal = () => {
